@@ -1,0 +1,31 @@
+/* Logo */
+/*
+[data-testid="stSidebar"] {
+                background-image: url(https://drive.google.com/uc?id=1_YA6DT8E2GP817VRpenvXCxSBBrhnl_C);
+                background-size: 200px;
+                background-repeat: no-repeat;
+                background-position: 50px 20px;
+            }
+*/
+
+/* Change all page font */
+* {
+    font-family: Segoe UI;
+
+/* Toan bo page, it moved title up to the top, depend of padding-top value */
+.block-container.st-emotion-cache-z5fcl4.ea3mdgi4 {
+    padding-top: 30px;
+    
+}
+/* Page titles */
+.st-emotion-cache-10trblm.e1nzilvr1 {
+    color: yellow;
+    font-size: 35px;
+    padding-top: 0px;
+}
+
+/* subheader */
+h3 {
+    color: #d234eb;
+}
+
