@@ -9,7 +9,7 @@ with open('style.css') as f:
     
 
 def main_entry():
-    pass
+    st.sidebar.markdown(''' Created with ❤️ by My Thang ''') 
 
     
     
@@ -17,14 +17,14 @@ if __name__ == "__main__":
     main_entry()
       
 '''
-1) Style the blocks. labels
-2) Tooltip / Popup for well, block
-3) Explore attributes of the block, well
-4) Store map to SS rather than data??? why not???
+1) Explore well log data by stremlit-pandas and pygwalker packages
+2) Invert x and or y for well log crossplot
+3) Explore well information from well shapefile by streamlit-pandas package
+4) Data range for well log cross-plot by st.slider
 5) 
-6) Global range of well log values dictionary and apply to the well!
-7) Invert depth; Square plot then add option on the right side
+6) 
+7) 
 8) HTML 5 and CSS and MARKDOWN
-9) Edit well shapefile... Done for some!
+
 
 '''

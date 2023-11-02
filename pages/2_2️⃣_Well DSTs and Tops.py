@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from welltop_plot_class import MtPlot # This class can be imported from mtlib.py module as well
-import st_tk_file_folder_dialog as sttk  # This library made by mtt!
 
 st.set_page_config(page_title="DSTs and TOPs", page_icon=":camel:", layout='wide', initial_sidebar_state='expanded')
 st.title("Well DSTs and Tops")
@@ -10,28 +9,30 @@ st.title("Well DSTs and Tops")
 with open('style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-@st.cache_data # Load the data and store into SS
-def load_data(file_in):
-    # Read only sheets named "well_top" and "well_dst"
-    df_well_top = pd.read_excel(file_in, sheet_name="well_top")
-    df_well_dst = pd.read_excel(file_in, sheet_name="well_dst")
-    
-    # Sort the dataframes
-    df_well_top = df_well_top.sort_values(["well_name", "surface_md_m"], ascending = [True, True])
-    df_well_dst = df_well_dst.sort_values(["well_name", "dst_number"], ascending = [True, True])
-    
-    # Get unique blocks and wells
-    unique_well_top = df_well_top["well_name"].unique()
-    unique_well_dst = df_well_dst["well_name"].unique()
-    file_loaded = True
-    
-    # Store data into SS
-    st.session_state["df_well_top"] = df_well_top
-    st.session_state["df_well_dst"] = df_well_dst
-    st.session_state["unique_well_top"] = unique_well_top
-    st.session_state["unique_well_dst"] = unique_well_dst
-    st.session_state["file_loaded"] = file_loaded
-    
+@st.cache_data # Load data, cache and store into Session State(SS)
+def load_data(uploaded_file):
+    if uploaded_file:
+        
+        # Read only sheets named "well_top" and "well_dst"
+        df_well_top = pd.read_excel(uploaded_file, sheet_name="well_top")
+        df_well_dst = pd.read_excel(uploaded_file, sheet_name="well_dst")
+        
+        # Sort the dataframes
+        df_well_top = df_well_top.sort_values(["well_name", "surface_md_m"], ascending = [True, True])
+        df_well_dst = df_well_dst.sort_values(["well_name", "dst_number"], ascending = [True, True])
+        
+        # Get unique blocks and wells
+        unique_well_top = df_well_top["well_name"].unique()
+        unique_well_dst = df_well_dst["well_name"].unique()
+        file_loaded = True
+        
+        # Store data into SS
+        st.session_state["df_well_top"] = df_well_top
+        st.session_state["df_well_dst"] = df_well_dst
+        st.session_state["unique_well_top"] = unique_well_top
+        st.session_state["unique_well_dst"] = unique_well_dst
+        st.session_state["file_loaded"] = file_loaded
+   
 # Main body
 def main_stuff():          
       
@@ -87,17 +88,13 @@ def main_stuff():
 def main_entry():
     text_message = ''':rainbow[Please select and load an Excel data file to begin - 
     the file must has two sheets named "well_top" and "well_dst"] :hibiscus:'''
-    # Create a button holder in order to delete the button after file loaded successfully
-    button_holder = st.sidebar.empty()    
-    # Create a placeholder for the widgets - it is eazy to delete by empty method
-    # placeholder = st.container()
-    # Define the file types to open
-    filetypes = [("All Excel Files", "*.xl* *.xlsx")]  
+
     try:
         if "file_loaded" not in st.session_state:
-            full_path_fileName = sttk.file_picker(button_label="Please select an Excel data file", 
-                                                        button_holder=button_holder, filetypes=filetypes)
-            load_data(full_path_fileName)
+            # Create a file uploader widget
+            uploaded_file = st.sidebar.file_uploader("Please select a Exel data file", type=["xls", "xlsx"], accept_multiple_files=False)           
+            # Call load_data  
+            load_data(uploaded_file)
             main_stuff()
         else:
             main_stuff()

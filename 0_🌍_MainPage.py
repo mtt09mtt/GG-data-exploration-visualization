@@ -10,6 +10,8 @@ def main():
     with open('style.css') as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     
+    st.sidebar.markdown(''' Created with ❤️ by My Thang ''') 
+    
     # Text in the main page
     st.markdown(
         """

@@ -4,7 +4,8 @@ import pandas as pd
 import folium
 from streamlit_folium import st_folium
 import extra_streamlit_components as stx
-import st_tk_file_folder_dialog as sttk  # This library made by mtt!
+import os
+import tempfile
 
 # Page configuration
 st.set_page_config(page_title="General", page_icon=":camel:", layout='wide', initial_sidebar_state='expanded')
@@ -42,37 +43,60 @@ tab_id = stx.tab_bar(data=[
 
 # Loading, caching and storing data into SS
 @st.cache_data
-def load_block_data(file_in):  
-        short_file_name1 = file_in.split("/")[-1]
-        vnBlocks_gdf = gpd.read_file(file_in) 
-        vnblocks_df = pd.DataFrame(vnBlocks_gdf.drop(columns="geometry"), copy=True)
-        list_of_blocks = vnblocks_df["BLOCK_NAME"].unique().tolist()
-        vnBlocks_loaded = True                   
+def load_block_data(uploaded_files):  
+    
+    # Check if files are uploaded
+    if uploaded_files:
+        # Create a temporary directory using tempfile
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            for uploaded_file in uploaded_files:
+                # Write out each uploaded file to the temporary directory
+                with open(os.path.join(tmp_dir, uploaded_file.name), 'wb') as f:
+                    f.write(uploaded_file.getbuffer())
+            # Read the shapefile from the temporary directory using geopandas
+            vnBlocks_gdf = gpd.read_file(os.path.join(tmp_dir, [file.name for file in uploaded_files if ".shp" in file.name][0]))
+            vnblocks_df = pd.DataFrame(vnBlocks_gdf.drop(columns="geometry"), copy=True)
+            list_of_blocks = vnblocks_df["BLOCK_NAME"].unique().tolist()
+            block_file_name = uploaded_files[0].name
+            vnBlocks_loaded = True                
+
         # Store data into SS
-        st.session_state["short_file_name1"] = short_file_name1
+        st.session_state["block_file_name"] = block_file_name
         st.session_state["vnBlocks_gdf"] = vnBlocks_gdf
         st.session_state["vnBlocks_df"] = vnblocks_df
         st.session_state["list_of_blocks"] = list_of_blocks
         st.session_state["vnBlocks_loaded"] = vnBlocks_loaded 
+        #st.write("📣 :rainbow[Block shapefiles loaded, cached and stored in Session State!]")
 
 @st.cache_data
-def load_well_data(file_in):  
-        short_file_name2 = file_in.split("/")[-1]
-        vnWells_gdf = gpd.read_file(file_in)   
-        vnwells_df = pd.DataFrame(vnWells_gdf.drop(columns="geometry"), copy=True)
-        vnWells_loaded = True
+def load_well_data(uploaded_files):  
+           
+    # Check if files are uploaded
+    if uploaded_files:
+        # Create a temporary directory using tempfile
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            for uploaded_file in uploaded_files:
+                # Write out each uploaded file to the temporary directory
+                with open(os.path.join(tmp_dir, uploaded_file.name), 'wb') as f:
+                    f.write(uploaded_file.getbuffer())
+            # Read the shapefile from the temporary directory using geopandas
+            vnWells_gdf = gpd.read_file(os.path.join(tmp_dir, [file.name for file in uploaded_files if ".shp" in file.name][0]))
+            vnwells_df = pd.DataFrame(vnWells_gdf.drop(columns="geometry"), copy=True)
+            well_file_name = uploaded_files[0].name
+            vnWells_loaded = True
+              
         # Store data into SS
-        st.session_state["short_file_name2"] = short_file_name2
+        st.session_state["well_file_name"] = well_file_name
         st.session_state["vnWells_gdf"] = vnWells_gdf 
         st.session_state["vnWells_df"] = vnwells_df 
         st.session_state["vnWells_loaded"] = vnWells_loaded 
-
+        #st.write("📣 :rainbow[Well shapefiles loaded, cached and stored in Session State!]")
                            
 # Main working functions for each tab
 def tab1_func():
-    
+    # st.sidebar.markdown(''' Created with ❤️ by My Thang ''') 
     # Display data files
-    st.write(f"📣 :rainbow[The working files: {st.session_state.short_file_name1} and  {st.session_state.short_file_name2}]") 
+    st.write(f"📣 :rainbow[The working files: {st.session_state.block_file_name} and  {st.session_state.well_file_name}]") 
     
     # Create a select box widget for selecting a block
     col1, col2 = st.columns(2)
@@ -83,7 +107,6 @@ def tab1_func():
     # Step1: Create a Basemap (OpenStreetMap and All vnBlocks) - Using JSON method
     m = folium.Map(location=[10.278, 108.197], ZOOM_START=3)
     folium.GeoJson(st.session_state["vnBlocks_gdf"], style_function=basemap_style).add_to(m)   # Show all blocks
-    # folium.GeoJson(st.session_state["wells_gpd"], style_function=None).add_to(m)  # Show all wells (Take time)
 
     # Step2: Create a feature group to add to the Basemap
     feature_group = folium.FeatureGroup(name="Blocks_wells")
@@ -143,7 +166,7 @@ def tab1_func():
         
 def tab2_func():
     # Display full well information
-    st.write(f"📣 :rainbow[The working files: {st.session_state.short_file_name1} and  {st.session_state.short_file_name2}]") 
+    st.write(f"📣 :rainbow[The working files: {st.session_state.block_file_name} and  {st.session_state.well_file_name}]") 
     col1, col2 = st.columns(2)
     number_of_blocks = len(st.session_state["list_of_blocks"])
     selected_block = col1.selectbox(f"📣 Found {number_of_blocks} blocks in total - Select a block", 
@@ -159,47 +182,47 @@ def tab3_func():
     pass
        
 def main_entry():   
-    
+    st.sidebar.markdown(''' Created with ❤️ by My Thang ''')
     if tab_id == "tab1":
-        text_message = ''':rainbow[Please select the block shapefile to begin] :hibiscus:'''
+                
         # Create a button holder in order to delete the button after file loaded successfully
-        button_holder = st.sidebar.empty()    
-        # Create a placeholder for the widgets - it is eazy to delete by empty method
-        # placeholder = st.container()
-        # Define the file types to open
-        filetypes = [("ESRI shapefile", "*.shp *.SHP")]  
+        files_uploader_holder = st.sidebar.empty()    
+                
         try:
             if "vnBlocks_loaded" not in st.session_state:
-                block_full_path_fileName = sttk.file_picker(button_label="Please select a block shapefile", 
-                                                            button_holder=button_holder, filetypes=filetypes)
-                load_block_data(block_full_path_fileName)
-                text_message = ''':rainbow[Please select the well shapefile to begin] :hibiscus:'''
-                
-            if "vnWells_loaded" not in st.session_state:
-                well_full_path_fileName = sttk.file_picker(button_label="Please select a well shapefile", 
-                                                           button_holder=button_holder, filetypes=filetypes)
-                load_well_data(well_full_path_fileName)
+                # Create a multiple file uploader widget
+                uploaded_block_files = files_uploader_holder.file_uploader("Press Ctrl to select all block shapefiles", 
+                                                                    type=["shp", "dbf", "prj", "shx"], accept_multiple_files=True)
+    
+                load_block_data(uploaded_block_files)
+                            
+            if "vnBlocks_loaded" in st.session_state and "vnWells_loaded" not in st.session_state:
+                # Create a multiple file uploader widget
+                uploaded_well_files = files_uploader_holder.file_uploader("Press Ctrl to select all well shapefiles", 
+                                                                    type=["shp", "dbf", "prj", "shx"], accept_multiple_files=True)
+               
+                load_well_data(uploaded_well_files)
         except:
-            st.markdown(text_message)
-        
+            pass
+           
         if "vnBlocks_loaded" in st.session_state and "vnWells_loaded" in st.session_state:
             try:
                 tab1_func()
             except:
-                st.write(f"📣 :red[Could not parse data of the block/well shapefile(s)!]")
+                st.write("📣 :red[Could not parse data of the block/well shapefile(s)!]")
         
     elif tab_id == "tab2":
         try:
             tab2_func()
         except:
-            st.write(f"📣 :red[Could not parse data of the block/well shapefile(s)!]")
+            st.write("📣 :red[Could not parse data of the block/well shapefile(s)!]")
 
     elif tab_id == "tab3":
         st.write(f"Welcome to {tab_id}")
 
     else:
-        pass
-        #placeholder = st.empty()
+        st.write("📣 :rainbow[Select the task above to begin]")
+
 
     
 if __name__ == "__main__":
