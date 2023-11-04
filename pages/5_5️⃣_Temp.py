@@ -18,13 +18,7 @@ if __name__ == "__main__":
       
 '''
 1) Explore well log data by stremlit-pandas and pygwalker packages
-2) Invert x and or y for well log crossplot
-3) Explore well information from well shapefile by streamlit-pandas package
-4) Data range for well log cross-plot by st.slider
-5) 
-6) 
-7) 
-8) HTML 5 and CSS and MARKDOWN
-
+2) Explore well information from well shapefile by streamlit-pandas package
+3) HTML 5 and CSS and MARKDOWN
 
 '''

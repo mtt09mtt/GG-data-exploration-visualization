@@ -39,7 +39,8 @@ def well_label_style(feature):
 tab_id = stx.tab_bar(data=[
     stx.TabBarItemData(id="tab1", title="✍️ General Basemap", description=None),
     stx.TabBarItemData(id="tab2", title="✍️ Well Information", description=None),
-    stx.TabBarItemData(id="tab3", title="✍️ Others", description=None)])
+    stx.TabBarItemData(id="tab3", title="✍️ Help", description=None),
+    stx.TabBarItemData(id="tab4", title="✍️ About", description=None)])
 
 # Loading, caching and storing data into SS
 @st.cache_data
@@ -182,7 +183,6 @@ def tab3_func():
     pass
        
 def main_entry():   
-    st.sidebar.markdown(''' Created with ❤️ by My Thang ''')
     if tab_id == "tab1":
                 
         # Create a button holder in order to delete the button after file loaded successfully
@@ -219,9 +219,14 @@ def main_entry():
 
     elif tab_id == "tab3":
         st.write(f"Welcome to {tab_id}")
-
+        
+    elif tab_id == "tab4":
+        pass
+        
     else:
         st.write("📣 :rainbow[Select the task above to begin]")
+        
+    st.sidebar.markdown(''' Created with ❤️ by My Thang ''')
 
 
     
