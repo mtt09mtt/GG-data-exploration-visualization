@@ -9,12 +9,23 @@ import tempfile
 
 # Page configuration
 st.set_page_config(page_title="General", page_icon=":camel:", layout='wide', initial_sidebar_state='expanded')
-st.title("General")
 
-# Read CSS file to apply the style
-with open('style.css') as f:
-    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-    
+# Add local image logo into the centre-top of the sidebar and use CSS to custom the logo position
+image_logo = st.session_state["image_logo"] # Get logo from SS that loaded and cached and stored in the Main Page
+logo_image_css = """ <style> [data-testid="stSidebar"] {
+    background-image: url("data:image/png;base64,%s");
+    background-repeat: no-repeat;
+    background-size: 100px;
+    background-position: 100px 5px;} </style> """ % image_logo
+st.markdown(logo_image_css, unsafe_allow_html=True)
+
+# Injecting custom CSS to reduce top space for the title, adjust padding-top value to move the title up
+custom_css = """ <style> .block-container.st-emotion-cache-z5fcl4.ea3mdgi4 {padding-top: 30px;} </style> """
+st.markdown(custom_css, unsafe_allow_html=True)
+
+# Page title. Dont use st.title()
+st.markdown("<span style='color: yellow; font-size:45px; font-weight: bold;'> General </span>", unsafe_allow_html=True)
+
 # Key information of well for the Popup
 popup_fields = ["TD_M", "STATUS", "RESULT", "NOTES", "COMPLETED"]
 
@@ -67,7 +78,7 @@ def load_block_data(uploaded_files):
         st.session_state["vnBlocks_df"] = vnblocks_df
         st.session_state["list_of_blocks"] = list_of_blocks
         st.session_state["vnBlocks_loaded"] = vnBlocks_loaded 
-        #st.write("📣 :rainbow[Block shapefiles loaded, cached and stored in Session State!]")
+        st.write("📣 :rainbow[Block shapefiles loaded, cached and stored in Session State!]")
 
 @st.cache_data
 def load_well_data(uploaded_files):  
@@ -91,7 +102,7 @@ def load_well_data(uploaded_files):
         st.session_state["vnWells_gdf"] = vnWells_gdf 
         st.session_state["vnWells_df"] = vnwells_df 
         st.session_state["vnWells_loaded"] = vnWells_loaded 
-        #st.write("📣 :rainbow[Well shapefiles loaded, cached and stored in Session State!]")
+        st.write("📣 :rainbow[Well shapefiles loaded, cached and stored in Session State!]")
                            
 # Main working functions for each tab
 def tab1_func():
@@ -202,8 +213,8 @@ def main_entry():
                                                                     type=["shp", "dbf", "prj", "shx"], accept_multiple_files=True)
                
                 load_well_data(uploaded_well_files)
-        except:
-            pass
+        except Exception as e:
+            st.write(e)
            
         if "vnBlocks_loaded" in st.session_state and "vnWells_loaded" in st.session_state:
             try:

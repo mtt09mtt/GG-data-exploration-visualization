@@ -6,11 +6,23 @@ import pandas as pd
 import extra_streamlit_components as stx
 
 st.set_page_config(page_title="Well Logs", page_icon=":camel:", layout='wide', initial_sidebar_state='expanded')
-st.title("Well Logs")
 
-# Read CSS file to apply the style
-with open('style.css') as f:
-    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+# Add local image logo into the centre-top of the sidebar and use CSS to custom the logo position
+image_logo = st.session_state["image_logo"] # Get logo from SS that loaded and cached and stored in the Main Page
+logo_image_css = """ <style> [data-testid="stSidebar"] {
+    background-image: url("data:image/png;base64,%s");
+    background-repeat: no-repeat;
+    background-size: 100px;
+    background-position: 100px 5px;} </style> """ % image_logo
+st.markdown(logo_image_css, unsafe_allow_html=True)
+
+
+# Injecting custom CSS to reduce top space for the title, adjust padding-top value to move the title up
+custom_css = """ <style> .block-container.st-emotion-cache-z5fcl4.ea3mdgi4 {padding-top: 30px;} </style> """
+st.markdown(custom_css, unsafe_allow_html=True)
+
+# Page title. Dont use st.title()
+st.markdown("<span style='color: yellow; font-size:45px; font-weight: bold;'> Well Logs </span>", unsafe_allow_html=True)
     
 # Create some tabs by using stx
 tab_id = stx.tab_bar(data=[
