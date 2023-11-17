@@ -11,24 +11,29 @@ import tempfile
 st.set_page_config(page_title="General", page_icon=":camel:", layout='wide', initial_sidebar_state='expanded')
 
 # Add local image logo into the centre-top of the sidebar and use CSS to custom the logo position
-image_logo = st.session_state["image_logo"] # Get logo from SS that loaded and cached and stored in the Main Page
+image_logo = st.session_state.image_logo # Get logo from SS that loaded and cached and stored in the Main Page
 logo_image_css = """ <style> [data-testid="stSidebar"] {
     background-image: url("data:image/png;base64,%s");
     background-repeat: no-repeat;
     background-size: 100px;
-    background-position: 100px 5px;} </style> """ % image_logo
+    background-position: center top;} </style> """ % image_logo
 st.markdown(logo_image_css, unsafe_allow_html=True)
 
-# Injecting custom CSS to reduce top space for the title, adjust padding-top value to move the title up
-custom_css = """ <style> .block-container.st-emotion-cache-z5fcl4.ea3mdgi4 {padding-top: 30px;} </style> """
-st.markdown(custom_css, unsafe_allow_html=True)
+# Injecting custom CSS to reduce top space for the title, adjust padding-top value to move the title up - Method 2
+st.markdown("<style>div.block-container{padding-top:0.5rem;}</style>", unsafe_allow_html=True)
 
 # Page title. Dont use st.title()
 st.markdown("<span style='color: yellow; font-size:45px; font-weight: bold;'> General </span>", unsafe_allow_html=True)
 
+# Create some tabs by using stx
+tab_id = stx.tab_bar(data=[
+    stx.TabBarItemData(id="tab1", title="✍️ General Basemap", description=None),
+    stx.TabBarItemData(id="tab2", title="✍️ Well Information", description=None),
+    stx.TabBarItemData(id="tab3", title="✍️ Help", description=None),
+    stx.TabBarItemData(id="tab4", title="✍️ About", description=None)])
+
 # Key information of well for the Popup
 popup_fields = ["TD_M", "STATUS", "RESULT", "NOTES", "COMPLETED"]
-
 
 # Define style of basemap
 def basemap_style(feature):
@@ -45,14 +50,10 @@ def well_label_style(feature):
     mt_icon = folium.DivIcon(html = f"""<div style="font-family: Arial; color: blue; font-size=9px; transform: translate(-250%, 50%);
                                           white-space:nowrap;">{feature}</div>""")
     return mt_icon
-    
-# Create some tabs by using stx
-tab_id = stx.tab_bar(data=[
-    stx.TabBarItemData(id="tab1", title="✍️ General Basemap", description=None),
-    stx.TabBarItemData(id="tab2", title="✍️ Well Information", description=None),
-    stx.TabBarItemData(id="tab3", title="✍️ Help", description=None),
-    stx.TabBarItemData(id="tab4", title="✍️ About", description=None)])
 
+# Define a configuration to format columns when use st.dataframe
+column_config1 = {}
+ 
 # Loading, caching and storing data into SS
 @st.cache_data
 def load_block_data(uploaded_files):  
@@ -67,17 +68,20 @@ def load_block_data(uploaded_files):
                     f.write(uploaded_file.getbuffer())
             # Read the shapefile from the temporary directory using geopandas
             vnBlocks_gdf = gpd.read_file(os.path.join(tmp_dir, [file.name for file in uploaded_files if ".shp" in file.name][0]))
-            vnblocks_df = pd.DataFrame(vnBlocks_gdf.drop(columns="geometry"), copy=True)
-            list_of_blocks = vnblocks_df["BLOCK_NAME"].unique().tolist()
-            block_file_name = uploaded_files[0].name
-            vnBlocks_loaded = True                
+            
+        # Convert geoPandasDataFrame to Pandas DataFrame and create some data
+        vnBlocks_df = pd.DataFrame(vnBlocks_gdf.drop(columns="geometry"), copy=True)
+        list_of_blocks = vnBlocks_df["BLOCK_NAME"].unique().tolist()
+        file_name1 = uploaded_files[0].name
+        vnBlocks_loaded = True                
 
         # Store data into SS
-        st.session_state["block_file_name"] = block_file_name
-        st.session_state["vnBlocks_gdf"] = vnBlocks_gdf
-        st.session_state["vnBlocks_df"] = vnblocks_df
-        st.session_state["list_of_blocks"] = list_of_blocks
-        st.session_state["vnBlocks_loaded"] = vnBlocks_loaded 
+        st.session_state.file_name1 = file_name1
+        st.session_state.vnBlocks_gdf = vnBlocks_gdf
+        st.session_state.vnBlocks_df = vnBlocks_df
+        st.session_state.list_of_blocks = list_of_blocks
+        st.session_state.vnBlocks_loaded = vnBlocks_loaded 
+
         st.write("📣 :rainbow[Block shapefiles loaded, cached and stored in Session State!]")
 
 @st.cache_data
@@ -94,37 +98,51 @@ def load_well_data(uploaded_files):
             # Read the shapefile from the temporary directory using geopandas
             vnWells_gdf = gpd.read_file(os.path.join(tmp_dir, [file.name for file in uploaded_files if ".shp" in file.name][0]))
             vnwells_df = pd.DataFrame(vnWells_gdf.drop(columns="geometry"), copy=True)
-            well_file_name = uploaded_files[0].name
+            file_name2 = uploaded_files[0].name
             vnWells_loaded = True
               
         # Store data into SS
-        st.session_state["well_file_name"] = well_file_name
-        st.session_state["vnWells_gdf"] = vnWells_gdf 
-        st.session_state["vnWells_df"] = vnwells_df 
-        st.session_state["vnWells_loaded"] = vnWells_loaded 
+        st.session_state.file_name2 = file_name2
+        st.session_state.vnWells_gdf = vnWells_gdf 
+        st.session_state.vnWells_df = vnwells_df 
+        st.session_state.vnWells_loaded = vnWells_loaded 
         st.write("📣 :rainbow[Well shapefiles loaded, cached and stored in Session State!]")
-                           
+        
 # Main working functions for each tab
 def tab1_func():
-    # st.sidebar.markdown(''' Created with ❤️ by My Thang ''') 
-    # Display data files
-    st.write(f"📣 :rainbow[The working files: {st.session_state.block_file_name} and  {st.session_state.well_file_name}]") 
+
+    # Display working data files
+    st.write(f"📣 :rainbow[The working files: {st.session_state.file_name1} and  {st.session_state.file_name2}]") 
     
-    # Create a select box widget for selecting a block
-    col1, col2 = st.columns(2)
-    selected_block = col1.selectbox("Select a block 🔎", st.session_state["list_of_blocks"])
-    list_of_wells = st.session_state["vnWells_df"] [st.session_state["vnWells_df"] ["BLOCK_NAME"]==selected_block]
-    selected_wells = col2.multiselect("Select a well 🔎", list_of_wells)
+    # Initialize a current selected block in SS
+    if "current_block_tab1" not in st.session_state:
+        st.session_state.current_block_tab1 = st.session_state.list_of_blocks[0]
+    
+    # User input of block
+    selected_block = st.sidebar.selectbox("Select a block 🔎", st.session_state.list_of_blocks, 
+                                          index=st.session_state.list_of_blocks.index(st.session_state.current_block_tab1), key = "tab1_block")
+    
+    # Assign the selected block to the current_block and store in SS
+    st.session_state.current_block_tab1 = selected_block
+    
+    list_of_wells = st.session_state.vnWells_df[st.session_state.vnWells_df["BLOCK_NAME"]==selected_block]   
+    
+    # User input of wells
+    if "current_wells_tab1" not in st.session_state:
+        st.session_state.current_wells_tab1 = []   # Assign a null list
+        
+    selected_wells = st.sidebar.multiselect("Select wells 🔎", list_of_wells, st.session_state.current_wells_tab1, key = "tab1_wells")
+    st.session_state.current_wells_tab1 = selected_wells  # Update the SS
         
     # Step1: Create a Basemap (OpenStreetMap and All vnBlocks) - Using JSON method
     m = folium.Map(location=[10.278, 108.197], ZOOM_START=3)
-    folium.GeoJson(st.session_state["vnBlocks_gdf"], style_function=basemap_style).add_to(m)   # Show all blocks
+    folium.GeoJson(st.session_state.vnBlocks_gdf, style_function=basemap_style).add_to(m)   # Show all blocks
 
     # Step2: Create a feature group to add to the Basemap
     feature_group = folium.FeatureGroup(name="Blocks_wells")
     
     # Step3a: Create features for bloks (GeoJson objects)
-    for _, row in st.session_state["vnBlocks_gdf"].iterrows():
+    for _, row in st.session_state.vnBlocks_gdf.iterrows():
         if row["BLOCK_NAME"] == selected_block:  
             selected_block_geojson  = folium.GeoJson(row['geometry'], style_function=selected_block_style)
             
@@ -140,7 +158,7 @@ def tab1_func():
         
     # Step3b: Create features for wells: the symbol(folium name is marker), label(well nanme) and the popup information
     # Note that the standard styles just work well with the add_to(m) method rather than with the st_folium()
-    for _, row in st.session_state["vnWells_gdf"].iterrows():
+    for _, row in st.session_state.vnWells_gdf.iterrows():
         well_count = 0
         if row["WELL_NAME"] in selected_wells:          
             # Create circle symbol for well
@@ -153,7 +171,7 @@ def tab1_func():
             feature_group.add_child(selected_well_labels)
             
             # Create the popup feature - this also show up the default folium marker (How to turn markers off???)          
-            popup_df_temp = st.session_state["vnWells_df"][st.session_state["vnWells_df"]["WELL_NAME"] == row["WELL_NAME"]]
+            popup_df_temp = st.session_state.vnWells_df[st.session_state.vnWells_df["WELL_NAME"] == row["WELL_NAME"]]
             popup_df = popup_df_temp[popup_fields]
             html = popup_df.to_html(classes="table table-striped table-hover table-condensed table-responsive")
             popup = folium.Popup(html)
@@ -174,71 +192,97 @@ def tab1_func():
         feature_group_to_add=feature_group,   # Update the map
         height=720,
         width=1500)
-    
         
 def tab2_func():
-    # Display full well information
-    st.write(f"📣 :rainbow[The working files: {st.session_state.block_file_name} and  {st.session_state.well_file_name}]") 
-    col1, col2 = st.columns(2)
-    number_of_blocks = len(st.session_state["list_of_blocks"])
-    selected_block = col1.selectbox(f"📣 Found {number_of_blocks} blocks in total - Select a block", 
-                                  st.session_state["list_of_blocks"])
-    wells_in_block = st.session_state["vnWells_df"][st.session_state["vnWells_df"]["BLOCK_NAME"] == selected_block]
+    
+    # This function will show full well information as a table (dataframe)
+    number_of_blocks = len(st.session_state.list_of_blocks)
+    
+    # Initialize a current selected block in SS
+    if "current_block_tab2" not in st.session_state:
+        st.session_state.current_block_tab2 = st.session_state.list_of_blocks[0]
+    
+    # User input of block
+    selected_block = st.sidebar.selectbox(f"📣 Found {number_of_blocks} blocks in total - Select a block 🔎", 
+                                  st.session_state.list_of_blocks, 
+                                  index=st.session_state.list_of_blocks.index(st.session_state.current_block_tab2),
+                                  key = "tab2_block")
+    
+    # Assign the selected block to the current_block and store in SS
+    st.session_state.current_block_tab2 = selected_block
+    
+    wells_in_block = st.session_state.vnWells_df[st.session_state.vnWells_df["BLOCK_NAME"] == selected_block]
     number_of_wells = wells_in_block.shape[0]
-    selected_well = col2.selectbox(f"📣 {number_of_wells} wells found within the block - Select a well", 
-                                          wells_in_block["WELL_NAME"])
-    selected_well_df = st.session_state["vnWells_df"][st.session_state["vnWells_df"]["WELL_NAME"] == selected_well]
-    st.dataframe(selected_well_df, use_container_width=True)
+      
+    # Initialize a current selected wells in SS
+    if "current_wells_tab2" not in st.session_state:
+        st.session_state.current_wells_tab2 = []   # Assign a null list
+        
+    # User input of wells
+    selected_wells = st.sidebar.multiselect(f"📣 {number_of_wells} wells found within the block - Select wells 🔎", 
+                                          wells_in_block["WELL_NAME"], st.session_state.current_wells_tab2, key = "tab2_wells")
+    # Assign the selected block to the current_block and store in SS
+    st.session_state.current_wells_tab2 = selected_wells  # Update the SS
+    
+    # Filter out the whole df for just selected wells only
+    selected_well_df = st.session_state.vnWells_df[st.session_state.vnWells_df["WELL_NAME"].isin(selected_wells)]
+    
+    # Show the well information
+    st.dataframe(selected_well_df, hide_index= True, use_container_width=True)
 
 def tab3_func():
     pass
        
-def main_entry():   
-    if tab_id == "tab1":
-                
-        # Create a button holder in order to delete the button after file loaded successfully
-        files_uploader_holder = st.sidebar.empty()    
-                
-        try:
-            if "vnBlocks_loaded" not in st.session_state:
-                # Create a multiple file uploader widget
-                uploaded_block_files = files_uploader_holder.file_uploader("Press Ctrl to select all block shapefiles", 
-                                                                    type=["shp", "dbf", "prj", "shx"], accept_multiple_files=True)
+def main_entry(): 
     
-                load_block_data(uploaded_block_files)
-                            
-            if "vnBlocks_loaded" in st.session_state and "vnWells_loaded" not in st.session_state:
-                # Create a multiple file uploader widget
-                uploaded_well_files = files_uploader_holder.file_uploader("Press Ctrl to select all well shapefiles", 
-                                                                    type=["shp", "dbf", "prj", "shx"], accept_multiple_files=True)
-               
-                load_well_data(uploaded_well_files)
-        except Exception as e:
-            st.write(e)
-           
-        if "vnBlocks_loaded" in st.session_state and "vnWells_loaded" in st.session_state:
+    text_message = ''':rainbow[Please select and load block and well shapefiles - Select the first task above to begin]:hibiscus:'''
+        
+    # Use a match case statement to execute the tab
+    match tab_id:
+        case "tab1":
+            # Create a button holder in order to delete the button after file loaded successfully
+            files_uploader_holder = st.sidebar.empty()    
+                    
+            # Load the data files at the first time of app running ONLY
             try:
-                tab1_func()
-            except:
-                st.write("📣 :red[Could not parse data of the block/well shapefile(s)!]")
-        
-    elif tab_id == "tab2":
-        try:
-            tab2_func()
-        except:
-            st.write("📣 :red[Could not parse data of the block/well shapefile(s)!]")
+                if "vnBlocks_loaded" not in st.session_state:
+                    # Create a multiple file uploader widget
+                    uploaded_block_files = files_uploader_holder.file_uploader("Press Ctrl to select all block shapefiles", 
+                                                                        type=["shp", "dbf", "prj", "shx"], accept_multiple_files=True)        
+                    load_block_data(uploaded_block_files)
+                                
+                if "vnBlocks_loaded" in st.session_state and "vnWells_loaded" not in st.session_state:
+                    # Create a multiple file uploader widget
+                    uploaded_well_files = files_uploader_holder.file_uploader("Press Ctrl to select all well shapefiles", 
+                                                                        type=["shp", "dbf", "prj", "shx"], accept_multiple_files=True)                  
+                    load_well_data(uploaded_well_files)
+            except Exception as e:
+                # Populate a message of loading data problem
+                st.write(e)
+            
+            # Check if data loaded and stored in the session state(SS) then execute the function
+            if "vnBlocks_loaded" in st.session_state and "vnWells_loaded" in st.session_state:
+                try:
+                    tab1_func()
+                    text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+                except Exception as e:
+                    st.write(e)            
+        case "tab2":
+            try:
+                tab2_func()
+                text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+            except Exception as e:
+                st.write(f"Welcome to {tab_id}")
+                st.write(e) 
 
-    elif tab_id == "tab3":
-        st.write(f"Welcome to {tab_id}")
-        
-    elif tab_id == "tab4":
-        pass
-        
-    else:
-        st.write("📣 :rainbow[Select the task above to begin]")
-        
+        case "tab3":
+            st.write(f"Welcome to {tab_id}")
+
+        case "tab4":
+            st.write(f"Welcome to {tab_id}")
+                
+    st.markdown(text_message)
     st.sidebar.markdown(''' Created with ❤️ by My Thang ''')
-
 
     
 if __name__ == "__main__":

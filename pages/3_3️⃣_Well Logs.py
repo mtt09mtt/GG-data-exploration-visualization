@@ -8,18 +8,17 @@ import extra_streamlit_components as stx
 st.set_page_config(page_title="Well Logs", page_icon=":camel:", layout='wide', initial_sidebar_state='expanded')
 
 # Add local image logo into the centre-top of the sidebar and use CSS to custom the logo position
-image_logo = st.session_state["image_logo"] # Get logo from SS that loaded and cached and stored in the Main Page
+image_logo = st.session_state.image_logo # Get logo from SS that loaded and cached and stored in the Main Page
 logo_image_css = """ <style> [data-testid="stSidebar"] {
     background-image: url("data:image/png;base64,%s");
     background-repeat: no-repeat;
     background-size: 100px;
-    background-position: 100px 5px;} </style> """ % image_logo
+    background-position: center top;} </style> """ % image_logo
 st.markdown(logo_image_css, unsafe_allow_html=True)
 
 
-# Injecting custom CSS to reduce top space for the title, adjust padding-top value to move the title up
-custom_css = """ <style> .block-container.st-emotion-cache-z5fcl4.ea3mdgi4 {padding-top: 30px;} </style> """
-st.markdown(custom_css, unsafe_allow_html=True)
+# Injecting custom CSS to reduce top space for the title, adjust padding-top value to move the title up - Method 2
+st.markdown("<style>div.block-container{padding-top:0.5rem;}</style>", unsafe_allow_html=True)
 
 # Page title. Dont use st.title()
 st.markdown("<span style='color: yellow; font-size:45px; font-weight: bold;'> Well Logs </span>", unsafe_allow_html=True)
@@ -49,7 +48,7 @@ def load_data(uploaded_file):
         # Then we need convert index to column data
         well_data_df.reset_index(inplace=True)     # -> This is a dataframe of all well log data values
         # Store dataframe into SS
-        st.session_state["df_for_plot"] = well_data_df       
+        st.session_state.df_for_plot = well_data_df       
     except:
         pass
     
@@ -59,11 +58,11 @@ def load_data(uploaded_file):
                   for item in las.well]
         well_header_df = pd.DataFrame(well_header).astype(str)   # -> This is a dataframe of all well information
         # Store dataframe into SS
-        st.session_state["well_header_df"] = well_header_df
+        st.session_state.well_header_df = well_header_df
         # Dig out well name from well header section
         well_name = well_header_df.loc[well_header_df["Name"]=="WELL", "Value"].values[0]
         # Store well name into SS
-        st.session_state["well_name"] = well_name
+        st.session_state.well_name = well_name
     except:
         pass
     
@@ -74,7 +73,7 @@ def load_data(uploaded_file):
                   for item in las.curves]
         curves_header_df = pd.DataFrame(curves_header).astype(str)   # -> This is a dataframe of all curve information
         # Store dataframe into SS
-        st.session_state["curves_header_df"] = curves_header_df
+        st.session_state.curves_header_df = curves_header_df
     except:
         pass
     
@@ -84,7 +83,7 @@ def load_data(uploaded_file):
                   for item in las.params]
         parameter_header_df = pd.DataFrame(parameter_header).astype(str)   # -> This is a dataframe of all parameter information
         # Store dataframe into SS
-        st.session_state["parameter_header_df"] = parameter_header_df
+        st.session_state.parameter_header_df = parameter_header_df
     except:
         pass
     
@@ -94,7 +93,7 @@ def load_data(uploaded_file):
                   for item in las.other]
         other_header_df = pd.DataFrame(other_header).astype(str)   # -> This is a dataframe of all other information
         # Store dataframe into SS
-        st.session_state["other_header_df"] = other_header_df
+        st.session_state.other_header_df = other_header_df
     except:
         pass
     
@@ -105,36 +104,28 @@ def cross_plot(in_df, well_name):
     # Define a color palette
     color_template = ["orange", "red","green", "blue", "purple"]
     
-    # Setup 4 columns
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    # All input widgets for the plot
+    with st.sidebar.expander(":arrow_down: Setup the X Axis"):
+        x_axis_val = st.selectbox('Value', options=in_df.columns, key = "x1")   # Get column name for the X axis
+        x_scale_type = st.selectbox("Scale type", options=["Linear", "Logarithmic"], key = "x2")
+        x_invert = st.selectbox("Inverted", options=["No", "Yes"], key = "x3")
+        
+    with st.sidebar.expander(":arrow_down: Setup the Y Axis"):
+        y_axis_val = st.selectbox('Value', options=in_df.columns, key = "y1")   # Get column name for the X axis
+        y_scale_type = st.selectbox("Scale type", options=["Linear", "Logarithmic"], key = "y2")
+        y_invert = st.selectbox("Inverted", options=["No", "Yes"], key = "y3")
     
-    # User input widgets for plot
-    x_axis_val = col1.selectbox('X-axis', options=in_df.columns)   # Get column name for the X axis
-    x_scale_type = col2.selectbox("X-axis scale type", options=["Linear", "Logarithmic"])
-    x_invert = col3.selectbox("X-axis invert", options=["No", "Yes"])
+    # Check if axises inverted
     if x_invert == "Yes":
         autorangeX ="reversed"
     else:
         autorangeX = None
-    y_axis_val = col4.selectbox('Y-axis', options=in_df.columns)
-    y_scale_type = col5.selectbox("Y-axis scale type", options=["Linear", "Logarithmic"])
-    y_invert = col6.selectbox("Y-axis invert", options=["No", "Yes"])
+    
     if y_invert == "Yes":
         autorangeY ="reversed"
     else:
         autorangeY = None
-    x_max = in_df[x_axis_val].max()
-    x_min = in_df[x_axis_val].min()
-    y_max = in_df[y_axis_val].max()
-    y_min = in_df[y_axis_val].min()
-    # st.write(x_max, x_min, y_max, y_min)
-    
-    # Setup 3 columns and place User input widgets for plot
-    col1a, col2a, col3a = st.columns(3)  
-    color_by = col1a.selectbox("Color the data by", options=in_df.columns)
-    x_range = col2a.slider(f"{x_axis_val} range", value = [x_min, x_max])
-    y_range = col3a.slider(f"{y_axis_val} range", value = [y_min, y_max])
-    
+        
     # Check scale types of X and Y axises
     if x_scale_type == "Logarithmic":
         log_x = True
@@ -144,19 +135,42 @@ def cross_plot(in_df, well_name):
         log_y = True
     else:
         log_y = False    
-    # Plot    
-    plot = px.scatter(in_df, x=x_axis_val, y=y_axis_val, color= color_by, color_continuous_scale= color_template,
-                      log_x= log_x, log_y= log_y)
-    # Slyling the plots
+        
+    # Get max, min of curve values    
+    x_max = in_df[x_axis_val].max()
+    x_min = in_df[x_axis_val].min()
+    y_max = in_df[y_axis_val].max()
+    y_min = in_df[y_axis_val].min()
+    
+    # Select ranges by sliders for curve of color    
+    color_by = st.sidebar.selectbox("Color the data by", options=in_df.columns, key = "color_by") # Returned a string
+    color_curve_df = in_df[color_by]
+    color_max = color_curve_df.max() # Get max value of curve for input to color slider
+    color_min = color_curve_df.min() # Get min value of curve for input to color slider   
+    
+    # Select ranges by sliders for curves of X and Y
+    x_range = st.sidebar.slider(f"{x_axis_val} range", value = [x_min, x_max], key = "slider2")
+    y_range = st.sidebar.slider(f"{y_axis_val} range", value = [y_min, y_max], key = "slider3")
+    user_input_color = st.sidebar.slider(f"{color_by} range", value = [color_min, color_max], key = "slider4")
+        
+    # Plot        
+    plot = px.scatter(in_df, x=x_axis_val, y=y_axis_val, color=color_by, color_continuous_scale=color_template,
+                      log_x=log_x, log_y=log_y, range_color=[color_min, color_max])
+    
+    # Slyling and Updating the plots
     plot.update_xaxes(showline=True, showgrid= True, linewidth=1, linecolor='white', mirror=True)
     plot.update_yaxes(showline=True, linewidth=1, linecolor='white', mirror=True)
     plot.update_xaxes(range = x_range, autorange = autorangeX)
     plot.update_yaxes(range = y_range, autorange = autorangeY)
+    plot.update_layout(coloraxis = dict(cmin=user_input_color[0], cmax=user_input_color[1]))
     plot.update_layout(height = 700)
     st.plotly_chart(plot, use_container_width=True)    
     
-def well_infor(well_header_df, curves_header_df, parameter_header_df, other_header_df):
+def well_infor(well_name, well_header_df, curves_header_df, parameter_header_df, other_header_df):
     # This function is simply put the header sections in to the streamlit expanders
+    
+    # Display well name
+    st.write(f"📣 :rainbow[The working files: {well_name}]") 
 
     with st.expander("Well information 	:arrow_down:"):
         st.dataframe(well_header_df, width=960, height=350)
@@ -171,45 +185,50 @@ def well_infor(well_header_df, curves_header_df, parameter_header_df, other_head
         st.dataframe(other_header_df, width=960, height=350)
 
             
-def main_entry():   
-       
-    if tab_id == "tab1":
-        # Check if the session state(SS) is not existing -> Upload the file then store it to SS
-        try:
-            if "df_for_plot" not in st.session_state:  
-                
-                # Create a file uploader widget
-                uploaded_file = st.sidebar.file_uploader("Please select a LAS file", type=["las", "LAS"], accept_multiple_files=False)           
-                # Call load_data  
-                load_data(uploaded_file)
-                               
-            # Call out the data from the SS
-            df1 = st.session_state["df_for_plot"]
-            well_name = st.session_state["well_name"]
-      
-            cross_plot(df1, well_name) 
-        except Exception:
-            st.markdown(''':rainbow[Please select the well LAS file to begin] :hibiscus:''') 
-            
-    elif tab_id == "tab2":
-        try:
-            df2 = st.session_state["well_header_df"]
-            df3 = st.session_state["curves_header_df"]
-            df4 = st.session_state["parameter_header_df"]
-            df5 = st.session_state["other_header_df"]
-            well_infor(df2, df3, df4, df5)
-        except:
-            pass
-        
-    elif tab_id == "tab3":
-        st.write(f"Welcome to {tab_id}")
-        
-    elif tab_id == "tab4":
-        pass
-        
-    else:
-        st.write("📣 :rainbow[Select the task above to begin]")
+def main_entry(): 
     
+    text_message = ''':rainbow[Please select and load a LAS data file - Select the first task above to begin]:hibiscus:'''
+    
+    # Use match case statement to execute the tab
+    match tab_id:
+        case "tab1":
+            # Check if the session state(SS) is not existing -> Upload the file then store it to SS
+            try:
+                if "df_for_plot" not in st.session_state:  
+                    
+                    # Create a file uploader widget
+                    uploaded_file = st.sidebar.file_uploader("Please select a LAS file", type=["las", "LAS"], accept_multiple_files=False)           
+                    # Call load_data  
+                    load_data(uploaded_file)
+                    
+                if "df_for_plot" in st.session_state:                     
+                    # Call out the data from the SS
+                    df1 = st.session_state.df_for_plot
+                    well_name = st.session_state.well_name 
+                    cross_plot(df1, well_name) 
+                    text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+            except Exception as e:
+                st.write(e) 
+                
+        case "tab2":
+            try:
+                well_name = st.session_state.well_name
+                df2 = st.session_state.well_header_df
+                df3 = st.session_state.curves_header_df
+                df4 = st.session_state.parameter_header_df
+                df5 = st.session_state.other_header_df
+                well_infor(well_name, df2, df3, df4, df5)
+                text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+            except Exception as e:
+                st.write(e)
+
+        case "tab3":
+            st.write(f"Welcome to {tab_id}")
+            
+        case "tab4":
+            st.write(f"Welcome to {tab_id}")
+    
+    st.markdown(text_message)
     st.sidebar.markdown(''' Created with ❤️ by My Thang ''') 
     
 if __name__ == "__main__":
