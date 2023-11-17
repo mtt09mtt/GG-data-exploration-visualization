@@ -166,23 +166,25 @@ def cross_plot(in_df, well_name):
     plot.update_layout(height = 700)
     st.plotly_chart(plot, use_container_width=True)    
     
+# This function is simply put the header sections in to the streamlit expanders
 def well_infor(well_name, well_header_df, curves_header_df, parameter_header_df, other_header_df):
-    # This function is simply put the header sections in to the streamlit expanders
+
+    # Check if the data loaded from tab1
+    if "well_name" in st.session_state:    
+
+        st.write(f"📣 :rainbow[The working files: {well_name}]") 
     
-    # Display well name
-    st.write(f"📣 :rainbow[The working files: {well_name}]") 
-
-    with st.expander("Well information 	:arrow_down:"):
-        st.dataframe(well_header_df, width=960, height=350)
-
-    with st.expander("Curve information :arrow_down:"):
-        st.dataframe(curves_header_df, width=960, height=350)
- 
-    with st.expander("Parameter information	:arrow_down:"):
-        st.dataframe(parameter_header_df, width=960, height=350)
-
-    with st.expander("Other information	:arrow_down:"):
-        st.dataframe(other_header_df, width=960, height=350)
+        with st.expander("Well information 	:arrow_down:"):
+            st.dataframe(well_header_df, width=960, height=350)
+    
+        with st.expander("Curve information :arrow_down:"):
+            st.dataframe(curves_header_df, width=960, height=350)
+     
+        with st.expander("Parameter information	:arrow_down:"):
+            st.dataframe(parameter_header_df, width=960, height=350)
+    
+        with st.expander("Other information	:arrow_down:"):
+            st.dataframe(other_header_df, width=960, height=350)
 
             
 def main_entry(): 

@@ -193,42 +193,45 @@ def tab1_func():
         height=720,
         width=1500)
         
-def tab2_func():
+# The function shows full well information as a table (dataframe)
+def tab2_func():         
     
-    # This function will show full well information as a table (dataframe)
-    number_of_blocks = len(st.session_state.list_of_blocks)
+    # Check if the data loaded from tab1
+    if "list_of_blocks" in st.session_state:
     
-    # Initialize a current selected block in SS
-    if "current_block_tab2" not in st.session_state:
-        st.session_state.current_block_tab2 = st.session_state.list_of_blocks[0]
-    
-    # User input of block
-    selected_block = st.sidebar.selectbox(f"📣 Found {number_of_blocks} blocks in total - Select a block 🔎", 
-                                  st.session_state.list_of_blocks, 
-                                  index=st.session_state.list_of_blocks.index(st.session_state.current_block_tab2),
-                                  key = "tab2_block")
-    
-    # Assign the selected block to the current_block and store in SS
-    st.session_state.current_block_tab2 = selected_block
-    
-    wells_in_block = st.session_state.vnWells_df[st.session_state.vnWells_df["BLOCK_NAME"] == selected_block]
-    number_of_wells = wells_in_block.shape[0]
-      
-    # Initialize a current selected wells in SS
-    if "current_wells_tab2" not in st.session_state:
-        st.session_state.current_wells_tab2 = []   # Assign a null list
+        number_of_blocks = len(st.session_state.list_of_blocks)
         
-    # User input of wells
-    selected_wells = st.sidebar.multiselect(f"📣 {number_of_wells} wells found within the block - Select wells 🔎", 
-                                          wells_in_block["WELL_NAME"], st.session_state.current_wells_tab2, key = "tab2_wells")
-    # Assign the selected block to the current_block and store in SS
-    st.session_state.current_wells_tab2 = selected_wells  # Update the SS
-    
-    # Filter out the whole df for just selected wells only
-    selected_well_df = st.session_state.vnWells_df[st.session_state.vnWells_df["WELL_NAME"].isin(selected_wells)]
-    
-    # Show the well information
-    st.dataframe(selected_well_df, hide_index= True, use_container_width=True)
+        # Initialize a current selected block in SS
+        if "current_block_tab2" not in st.session_state:
+            st.session_state.current_block_tab2 = st.session_state.list_of_blocks[0]
+        
+        # User input of block
+        selected_block = st.sidebar.selectbox(f"📣 Found {number_of_blocks} blocks in total - Select a block 🔎", 
+                                      st.session_state.list_of_blocks, 
+                                      index=st.session_state.list_of_blocks.index(st.session_state.current_block_tab2),
+                                      key = "tab2_block")
+        
+        # Assign the selected block to the current_block and store in SS
+        st.session_state.current_block_tab2 = selected_block
+        
+        wells_in_block = st.session_state.vnWells_df[st.session_state.vnWells_df["BLOCK_NAME"] == selected_block]
+        number_of_wells = wells_in_block.shape[0]
+          
+        # Initialize a current selected wells in SS
+        if "current_wells_tab2" not in st.session_state:
+            st.session_state.current_wells_tab2 = []   # Assign a null list
+            
+        # User input of wells
+        selected_wells = st.sidebar.multiselect(f"📣 {number_of_wells} wells found within the block - Select wells 🔎", 
+                                              wells_in_block["WELL_NAME"], st.session_state.current_wells_tab2, key = "tab2_wells")
+        # Assign the selected block to the current_block and store in SS
+        st.session_state.current_wells_tab2 = selected_wells  # Update the SS
+        
+        # Filter out the whole df for just selected wells only
+        selected_well_df = st.session_state.vnWells_df[st.session_state.vnWells_df["WELL_NAME"].isin(selected_wells)]
+        
+        # Show the well information
+        st.dataframe(selected_well_df, hide_index= True, use_container_width=True)
 
 def tab3_func():
     pass
