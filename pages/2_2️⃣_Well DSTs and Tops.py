@@ -119,33 +119,30 @@ def main_entry():
     text_message = ''':rainbow[Please select and load an Excel data file - 
     The file must has two sheets named "well_top" and "well_dst". Select the first task above to begin]:hibiscus:'''
     
-    # Use match case statement to execute the tab   
-    match tab_id:
-        case "tab1":
-            try:
-                if "file_loaded" not in st.session_state:
-                    # Create a file uploader widget
-                    uploaded_file = st.sidebar.file_uploader("Please select a Exel data file", type=["xls", "xlsx"], accept_multiple_files=False)           
-                    # load_excel data file
-                    load_data(uploaded_file)
-                if "file_loaded" in st.session_state:
-                    main_stuff()
-                    text_message = ''':rainbow[Please select a desired TAB for more information]:hibiscus:'''
-            except Exception as e:
-                st.write(e)
+    if tab_id == "tab1":
+        try:
+            if "file_loaded" not in st.session_state:
+                # Create a file uploader widget
+                uploaded_file = st.sidebar.file_uploader("Please select a Exel data file", type=["xls", "xlsx"], accept_multiple_files=False)           
+                # load_excel data file
+                load_data(uploaded_file)
+            if "file_loaded" in st.session_state:
+                main_stuff()
+                text_message = ''':rainbow[Please select a desired TAB for more information]:hibiscus:'''
+        except Exception as e:
+            st.write(e)
 
-        case "tab2":
-            st.write("Welcome to the Data file example TAB")
-            text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
-        case "tab3":
-            st.write("Welcome to the Help TAB")
-            text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
-        case "tab4":
-            st.write("Welcome to the About TAB")
-            text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+    elif tab_id == "tab2":
+        st.write("Welcome to the Data file example TAB")
+        text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+    elif tab_id == "tab3":
+        st.write("Welcome to the Help TAB")
+        text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+    elif tab_id == "tab4":
+        st.write("Welcome to the About TAB")
+        text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
     
-    st.markdown(text_message)
-        
+    st.markdown(text_message)     
     st.sidebar.markdown(''' Created with ❤️ by My Thang ''')
         
     

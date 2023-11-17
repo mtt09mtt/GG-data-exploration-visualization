@@ -237,49 +237,47 @@ def main_entry():
     
     text_message = ''':rainbow[Please select and load block and well shapefiles - Select the first task above to begin]:hibiscus:'''
         
-    # Use a match case statement to execute the tab
-    match tab_id:
-        case "tab1":
-            # Create a button holder in order to delete the button after file loaded successfully
-            files_uploader_holder = st.sidebar.empty()    
-                    
-            # Load the data files at the first time of app running ONLY
+    if tab_id == "tab1":
+        # Create a button holder in order to delete the button after file loaded successfully
+        files_uploader_holder = st.sidebar.empty()    
+                
+        # Load the data files at the first time of app running ONLY
+        try:
+            if "vnBlocks_loaded" not in st.session_state:
+                # Create a multiple file uploader widget
+                uploaded_block_files = files_uploader_holder.file_uploader("Press Ctrl to select all block shapefiles", 
+                                                                    type=["shp", "dbf", "prj", "shx"], accept_multiple_files=True)        
+                load_block_data(uploaded_block_files)
+                            
+            if "vnBlocks_loaded" in st.session_state and "vnWells_loaded" not in st.session_state:
+                # Create a multiple file uploader widget
+                uploaded_well_files = files_uploader_holder.file_uploader("Press Ctrl to select all well shapefiles", 
+                                                                    type=["shp", "dbf", "prj", "shx"], accept_multiple_files=True)                  
+                load_well_data(uploaded_well_files)
+        except Exception as e:
+            # Populate a message of loading data problem
+            st.write(e)
+        
+        # Check if data loaded and stored in the session state(SS) then execute the function
+        if "vnBlocks_loaded" in st.session_state and "vnWells_loaded" in st.session_state:
             try:
-                if "vnBlocks_loaded" not in st.session_state:
-                    # Create a multiple file uploader widget
-                    uploaded_block_files = files_uploader_holder.file_uploader("Press Ctrl to select all block shapefiles", 
-                                                                        type=["shp", "dbf", "prj", "shx"], accept_multiple_files=True)        
-                    load_block_data(uploaded_block_files)
-                                
-                if "vnBlocks_loaded" in st.session_state and "vnWells_loaded" not in st.session_state:
-                    # Create a multiple file uploader widget
-                    uploaded_well_files = files_uploader_holder.file_uploader("Press Ctrl to select all well shapefiles", 
-                                                                        type=["shp", "dbf", "prj", "shx"], accept_multiple_files=True)                  
-                    load_well_data(uploaded_well_files)
-            except Exception as e:
-                # Populate a message of loading data problem
-                st.write(e)
-            
-            # Check if data loaded and stored in the session state(SS) then execute the function
-            if "vnBlocks_loaded" in st.session_state and "vnWells_loaded" in st.session_state:
-                try:
-                    tab1_func()
-                    text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
-                except Exception as e:
-                    st.write(e)            
-        case "tab2":
-            try:
-                tab2_func()
+                tab1_func()
                 text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
             except Exception as e:
-                st.write(f"Welcome to {tab_id}")
-                st.write(e) 
+                st.write(e)            
+                
+    elif tab_id == "tab2":
+        try:
+            tab2_func()
+            text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+        except Exception as e:
+            st.write(e) 
 
-        case "tab3":
-            st.write(f"Welcome to {tab_id}")
+    elif tab_id == "tab3":
+        st.write(f"Welcome to {tab_id}")
 
-        case "tab4":
-            st.write(f"Welcome to {tab_id}")
+    elif tab_id == "tab4":
+        st.write(f"Welcome to {tab_id}")
                 
     st.markdown(text_message)
     st.sidebar.markdown(''' Created with ❤️ by My Thang ''')

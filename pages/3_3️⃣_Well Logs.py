@@ -189,44 +189,42 @@ def main_entry():
     
     text_message = ''':rainbow[Please select and load a LAS data file - Select the first task above to begin]:hibiscus:'''
     
-    # Use match case statement to execute the tab
-    match tab_id:
-        case "tab1":
-            # Check if the session state(SS) is not existing -> Upload the file then store it to SS
-            try:
-                if "df_for_plot" not in st.session_state:  
-                    
-                    # Create a file uploader widget
-                    uploaded_file = st.sidebar.file_uploader("Please select a LAS file", type=["las", "LAS"], accept_multiple_files=False)           
-                    # Call load_data  
-                    load_data(uploaded_file)
-                    
-                if "df_for_plot" in st.session_state:                     
-                    # Call out the data from the SS
-                    df1 = st.session_state.df_for_plot
-                    well_name = st.session_state.well_name 
-                    cross_plot(df1, well_name) 
-                    text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
-            except Exception as e:
-                st.write(e) 
+    if tab_id == "tab1":
+        # Check if the session state(SS) is not existing -> Upload the file then store it to SS
+        try:
+            if "df_for_plot" not in st.session_state:  
                 
-        case "tab2":
-            try:
-                well_name = st.session_state.well_name
-                df2 = st.session_state.well_header_df
-                df3 = st.session_state.curves_header_df
-                df4 = st.session_state.parameter_header_df
-                df5 = st.session_state.other_header_df
-                well_infor(well_name, df2, df3, df4, df5)
+                # Create a file uploader widget
+                uploaded_file = st.sidebar.file_uploader("Please select a LAS file", type=["las", "LAS"], accept_multiple_files=False)           
+                # Call load_data  
+                load_data(uploaded_file)
+                
+            if "df_for_plot" in st.session_state:                     
+                # Call out the data from the SS
+                df1 = st.session_state.df_for_plot
+                well_name = st.session_state.well_name 
+                cross_plot(df1, well_name) 
                 text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
-            except Exception as e:
-                st.write(e)
-
-        case "tab3":
-            st.write(f"Welcome to {tab_id}")
+        except Exception as e:
+            st.write(e) 
             
-        case "tab4":
-            st.write(f"Welcome to {tab_id}")
+    elif tab_id == "tab2":
+        try:
+            well_name = st.session_state.well_name
+            df2 = st.session_state.well_header_df
+            df3 = st.session_state.curves_header_df
+            df4 = st.session_state.parameter_header_df
+            df5 = st.session_state.other_header_df
+            well_infor(well_name, df2, df3, df4, df5)
+            text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+        except Exception as e:
+            st.write(e)
+
+    elif tab_id == "tab3":
+        st.write(f"Welcome to {tab_id}")
+        
+    elif tab_id == "tab4":
+        st.write(f"Welcome to {tab_id}")
     
     st.markdown(text_message)
     st.sidebar.markdown(''' Created with ❤️ by My Thang ''') 
