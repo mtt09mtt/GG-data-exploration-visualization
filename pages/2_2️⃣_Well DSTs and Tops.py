@@ -6,13 +6,14 @@ import extra_streamlit_components as stx
 st.set_page_config(page_title="DSTs and TOPs", page_icon=":camel:", layout='wide', initial_sidebar_state='expanded')
 
 # Add local image logo into the centre-top of the sidebar and use CSS to custom the logo position
-image_logo = st.session_state.image_logo # Get logo from SS that loaded and cached and stored in the Main Page
-logo_image_css = """ <style> [data-testid="stSidebar"] {
-    background-image: url("data:image/png;base64,%s");
-    background-repeat: no-repeat;
-    background-size: 100px;
-    background-position: center top;} </style> """ % image_logo
-st.markdown(logo_image_css, unsafe_allow_html=True)
+if "image_logo" in st.session_state:
+    image_logo = st.session_state.image_logo # Get logo from SS that loaded and cached and stored in the Main Page
+    logo_image_css = """ <style> [data-testid="stSidebar"] {
+        background-image: url("data:image/png;base64,%s");
+        background-repeat: no-repeat;
+        background-size: 100px;
+        background-position: center top;} </style> """ % image_logo
+    st.markdown(logo_image_css, unsafe_allow_html=True)
 
 # Injecting custom CSS to reduce top space for the title, adjust padding-top value to move the title up - Method 2
 st.markdown("<style>div.block-container{padding-top:0.5rem;}</style>", unsafe_allow_html=True)
@@ -64,8 +65,7 @@ def main_stuff():
     selected_well_has_top = st.sidebar.selectbox("Well with tops 🔎", st.session_state.unique_well_top,
                                                  index=st.session_state.unique_well_top.index(st.session_state.current_well_has_top))
     st.session_state.current_well_has_top = selected_well_has_top
-    
-    
+       
     selected_well_has_dst = st.sidebar.selectbox("Well with DSTs 🔎", st.session_state.unique_well_dst,
                                                  index=st.session_state.unique_well_dst.index(st.session_state.current_well_has_dst))
     st.session_state.current_well_has_dst = selected_well_has_dst
@@ -119,6 +119,7 @@ def main_entry():
     text_message = ''':rainbow[Please select and load an Excel data file - 
     The file must has two sheets named "well_top" and "well_dst". Select the first task above to begin]:hibiscus:'''
     
+    # Use match case statement to execute the tab   
     if tab_id == "tab1":
         try:
             if "file_loaded" not in st.session_state:
@@ -133,16 +134,22 @@ def main_entry():
             st.write(e)
 
     elif tab_id == "tab2":
-        st.write("Welcome to the Data file example TAB")
+        st.write("📣 :rainbow[This is an example Excel sheet of the input well top data]")
+        st.image(r"./images/well_top_example.PNG")
+        st.write("📣 :rainbow[This is an example Excel sheet of the input well DST data]")
+        st.image(r"./images/well_dst_example.PNG")
         text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+        
     elif tab_id == "tab3":
-        st.write("Welcome to the Help TAB")
+        st.write("Welcome to the Help TAB - Under construction")
         text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+        
     elif tab_id == "tab4":
-        st.write("Welcome to the About TAB")
+        st.write("Welcome to the About TAB - Under construction")
         text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
     
-    st.markdown(text_message)     
+    st.markdown(text_message)
+        
     st.sidebar.markdown(''' Created with ❤️ by My Thang ''')
         
     

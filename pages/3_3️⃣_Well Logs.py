@@ -8,13 +8,14 @@ import extra_streamlit_components as stx
 st.set_page_config(page_title="Well Logs", page_icon=":camel:", layout='wide', initial_sidebar_state='expanded')
 
 # Add local image logo into the centre-top of the sidebar and use CSS to custom the logo position
-image_logo = st.session_state.image_logo # Get logo from SS that loaded and cached and stored in the Main Page
-logo_image_css = """ <style> [data-testid="stSidebar"] {
-    background-image: url("data:image/png;base64,%s");
-    background-repeat: no-repeat;
-    background-size: 100px;
-    background-position: center top;} </style> """ % image_logo
-st.markdown(logo_image_css, unsafe_allow_html=True)
+if "image_logo" in st.session_state:
+    image_logo = st.session_state.image_logo # Get logo from SS that loaded and cached and stored in the Main Page
+    logo_image_css = """ <style> [data-testid="stSidebar"] {
+        background-image: url("data:image/png;base64,%s");
+        background-repeat: no-repeat;
+        background-size: 100px;
+        background-position: center top;} </style> """ % image_logo
+    st.markdown(logo_image_css, unsafe_allow_html=True)
 
 
 # Injecting custom CSS to reduce top space for the title, adjust padding-top value to move the title up - Method 2
@@ -168,29 +169,28 @@ def cross_plot(in_df, well_name):
     
 # This function is simply put the header sections in to the streamlit expanders
 def well_infor(well_name, well_header_df, curves_header_df, parameter_header_df, other_header_df):
+       
+    # Display well name
+    st.write(f"📣 :rainbow[The working files: {well_name}]") 
 
-    # Check if the data loaded from tab1
-    if "well_name" in st.session_state:    
+    with st.expander("Well information 	:arrow_down:"):
+        st.dataframe(well_header_df, width=960, height=350)
 
-        st.write(f"📣 :rainbow[The working files: {well_name}]") 
-    
-        with st.expander("Well information 	:arrow_down:"):
-            st.dataframe(well_header_df, width=960, height=350)
-    
-        with st.expander("Curve information :arrow_down:"):
-            st.dataframe(curves_header_df, width=960, height=350)
-     
-        with st.expander("Parameter information	:arrow_down:"):
-            st.dataframe(parameter_header_df, width=960, height=350)
-    
-        with st.expander("Other information	:arrow_down:"):
-            st.dataframe(other_header_df, width=960, height=350)
+    with st.expander("Curve information :arrow_down:"):
+        st.dataframe(curves_header_df, width=960, height=350)
+ 
+    with st.expander("Parameter information	:arrow_down:"):
+        st.dataframe(parameter_header_df, width=960, height=350)
+
+    with st.expander("Other information	:arrow_down:"):
+        st.dataframe(other_header_df, width=960, height=350)
 
             
 def main_entry(): 
     
     text_message = ''':rainbow[Please select and load a LAS data file - Select the first task above to begin]:hibiscus:'''
     
+    # Use match case statement to execute the tab
     if tab_id == "tab1":
         # Check if the session state(SS) is not existing -> Upload the file then store it to SS
         try:
@@ -212,21 +212,23 @@ def main_entry():
             
     elif tab_id == "tab2":
         try:
-            well_name = st.session_state.well_name
-            df2 = st.session_state.well_header_df
-            df3 = st.session_state.curves_header_df
-            df4 = st.session_state.parameter_header_df
-            df5 = st.session_state.other_header_df
-            well_infor(well_name, df2, df3, df4, df5)
-            text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
+            # Check if the data loaded from tab1
+            if "well_name" in st.session_state:
+                well_name = st.session_state.well_name
+                df2 = st.session_state.well_header_df
+                df3 = st.session_state.curves_header_df
+                df4 = st.session_state.parameter_header_df
+                df5 = st.session_state.other_header_df
+                well_infor(well_name, df2, df3, df4, df5)
+                text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
         except Exception as e:
             st.write(e)
 
     elif tab_id == "tab3":
-        st.write(f"Welcome to {tab_id}")
+        st.write("Welcome to the TAB - Under construction")
         
     elif tab_id == "tab4":
-        st.write(f"Welcome to {tab_id}")
+        st.write("Welcome to the TAB - Under construction")
     
     st.markdown(text_message)
     st.sidebar.markdown(''' Created with ❤️ by My Thang ''') 

@@ -16,7 +16,7 @@ def main_entry():
     st.set_page_config(page_title="Home Page", page_icon=":camel:", layout='wide', initial_sidebar_state='expanded')
         
     # Add local image logo into the centre-top of the sidebar and use CSS to custom the logo position
-    image_logo = myLogo("Leopard_100px.png")
+    image_logo = myLogo(r"./images/Leopard_100px.png")
     
     # Store the logo into SS for other pages (modules)
     st.session_state.image_logo = image_logo

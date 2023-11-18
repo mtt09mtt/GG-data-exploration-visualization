@@ -11,13 +11,14 @@ import tempfile
 st.set_page_config(page_title="General", page_icon=":camel:", layout='wide', initial_sidebar_state='expanded')
 
 # Add local image logo into the centre-top of the sidebar and use CSS to custom the logo position
-image_logo = st.session_state.image_logo # Get logo from SS that loaded and cached and stored in the Main Page
-logo_image_css = """ <style> [data-testid="stSidebar"] {
-    background-image: url("data:image/png;base64,%s");
-    background-repeat: no-repeat;
-    background-size: 100px;
-    background-position: center top;} </style> """ % image_logo
-st.markdown(logo_image_css, unsafe_allow_html=True)
+if "image_logo" in st.session_state:
+    image_logo = st.session_state.image_logo # Get logo from SS that loaded and cached and stored in the Main Page
+    logo_image_css = """ <style> [data-testid="stSidebar"] {
+        background-image: url("data:image/png;base64,%s");
+        background-repeat: no-repeat;
+        background-size: 100px;
+        background-position: center top;} </style> """ % image_logo
+    st.markdown(logo_image_css, unsafe_allow_html=True)
 
 # Injecting custom CSS to reduce top space for the title, adjust padding-top value to move the title up - Method 2
 st.markdown("<style>div.block-container{padding-top:0.5rem;}</style>", unsafe_allow_html=True)
@@ -193,12 +194,11 @@ def tab1_func():
         height=720,
         width=1500)
         
-# The function shows full well information as a table (dataframe)
-def tab2_func():         
+# This function shows full well information as a table (dataframe)
+def tab2_func():
     
     # Check if the data loaded from tab1
     if "list_of_blocks" in st.session_state:
-    
         number_of_blocks = len(st.session_state.list_of_blocks)
         
         # Initialize a current selected block in SS
@@ -240,6 +240,7 @@ def main_entry():
     
     text_message = ''':rainbow[Please select and load block and well shapefiles - Select the first task above to begin]:hibiscus:'''
         
+    # Use a match case statement to execute the tab
     if tab_id == "tab1":
         # Create a button holder in order to delete the button after file loaded successfully
         files_uploader_holder = st.sidebar.empty()    
@@ -268,19 +269,19 @@ def main_entry():
                 text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
             except Exception as e:
                 st.write(e)            
-                
     elif tab_id == "tab2":
         try:
             tab2_func()
             text_message = ''':rainbow[Please select a desired TAB above for more information]:hibiscus:'''
         except Exception as e:
+            st.write(f"Welcome to {tab_id}")
             st.write(e) 
 
     elif tab_id == "tab3":
-        st.write(f"Welcome to {tab_id}")
+        st.write("Welcome to the TAB - Under construction")
 
     elif tab_id == "tab4":
-        st.write(f"Welcome to {tab_id}")
+        st.write("Welcome to the TAB - Under construction")
                 
     st.markdown(text_message)
     st.sidebar.markdown(''' Created with ❤️ by My Thang ''')
