@@ -1,7 +1,13 @@
 import streamlit as st
 import base64
 
-# Prepare a local image for the logo. pgn_file (100px each side) is in put the same folder with this source
+# Magic statement to preserve widget input values across pages
+st.session_state.update(st.session_state)
+
+# Alias the Session State
+ss = st.session_state
+
+# Prepare a local image for the logo. pgn_file (100px each side) must be in same folder with this source
 @st.cache_data
 def myLogo(pgn_file):
     # Convert a local pgn image logo file to a base64 string
@@ -19,7 +25,7 @@ def main_entry():
     image_logo = myLogo(r"./images/Leopard_100px.png")
     
     # Store the logo into SS for other pages (modules)
-    st.session_state.image_logo = image_logo
+    ss.image_logo = image_logo
     
     # Style the logo
     logo_image_css = """ <style> [data-testid="stSidebar"] {
