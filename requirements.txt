@@ -1,5 +1,6 @@
 streamlit == 1.27.0
-pandas == 2.0.3
+# pandas == 2.0.3
+pandas
 geopandas == 0.13.2
 folium == 0.14.0
 lasio == 0.30
